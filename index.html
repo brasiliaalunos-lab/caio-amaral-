@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jujutsu Kaisen: Cursed Clash Ultimate 2D</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        jjtDark: '#030308',
+                        jjtCard: '#0b0b15',
+                        jjtPurple: '#7c3aed',
+                        jjtRed: '#dc2626',
+                        jjtBlue: '#3b82f6',
+                        jjtGold: '#f59e0b'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Cinzel:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #030308;
+            color: #f3f4f6;
+            overflow-x: hidden;
+            user-select: none;
+        }
+        .title-font {
+            font-family: 'Cinzel', serif;
+        }
+        .cursed-glow {
+            box-shadow: 0 0 45px rgba(124, 58, 237, 0.55);
+        }
+        .domain-glow {
+            box-shadow: 0 0 65px rgba(59, 130, 246, 0.75);
+        }
+        .sukuna-glow {
+            box-shadow: 0 0 65px rgba(220, 38, 38, 0.75);
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b0b15;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #7c3aed;
+            border-radius: 4px;
+        }
+        canvas {
+            display: block;
+            background: radial-gradient(circle at center, #101026 0%, #010104 100%);
+            box-shadow: 0 0 60px rgba(0,0,0,0.95);
+            touch-action: none;
+        }
+    </style>
+</head>
+<body class="bg-jjtDark text-gray-100 min-h-screen flex flex-col selection:bg-purple-600 selection:text-white">
+
+    <!-- Modal de Sistema / Diálogo / Cutscene Estilo Demon Slayer -->
+    <div id="modal-container" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md hidden">
+        <div class="bg-jjtCard border-2 border-purple-500/70 rounded-3xl p-8 max-w-lg w-full mx-4 text-center shadow-2xl cursed-glow relative overflow-hidden">
+            <div id="modal-cutscene-banner" class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-purple-600 via-indigo-500 to-red-600"></div>
+            <div id="modal-icon" class="text-6xl text-purple-400 mb-4 animate-pulse"><i class="fa-solid fa-fire"></i></div>
+            <h3 id="modal-title" class="text-3xl font-black title-font text-white mb-3 tracking-wide">Fim da Batalha</h3>
+            <p id="modal-msg" class="text-gray-200 text-base mb-8 leading-relaxed font-medium">Vencedor declarado...</p>
+            <button onclick="closeModalToMenu()" class="w-full py-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold rounded-2xl transition shadow-xl text-sm tracking-widest uppercase transform hover:scale-105">
+                Continuar Jornada
+            </button>
+        </div>
+    </div>
+
+    <!-- Header Principal -->
+    <header class="bg-jjtCard/90 border-b border-purple-900/30 sticky top-0 z-40 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-red-600 flex items-center justify-center cursed-glow">
+                    <i class="fa-solid fa-fire text-white text-lg"></i>
+                </div>
+                <div>
+                    <span class="text-xs uppercase tracking-widest text-purple-400 font-bold">Jujutsu Kaisen</span>
+                    <h1 class="text-lg sm:text-xl font-black title-font tracking-wider bg-gradient-to-r from-white via-purple-200 to-purple-400 bg-clip-text text-transparent">Cursed Clash Ultimate</h1>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-3">
+                <button onclick="returnToMenu()" class="px-4 py-2 bg-purple-600/20 hover:bg-purple-600/40 text-purple-300 border border-purple-500/30 rounded-xl text-xs font-bold transition flex items-center space-x-2">
+                    <i class="fa-solid fa-house"></i><span>Menu Principal</span>
+                </button>
+                <button onclick="toggleAudio()" id="audio-btn" class="px-4 py-2 bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-300 border border-indigo-500/30 rounded-xl text-xs font-bold transition flex items-center space-x-2">
+                    <i class="fa-solid fa-volume-high"></i><span>Áudio</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full flex flex-col justify-center items-center">
+
+        <!-- TELA 1: MENU PRINCIPAL -->
+        <div id="screen-menu" class="w-full max-w-2xl text-center space-y-8 py-12">
+            <div class="relative bg-gradient-to-r from-purple-900/40 via-jjtCard to-red-900/40 border-2 border-purple-500/40 rounded-3xl p-8 sm:p-12 cursed-glow">
+                <h2 class="text-4xl sm:text-6xl font-black title-font tracking-wider text-white mb-2">CURSED CLASH</h2>
+                <span class="text-xs uppercase tracking-widest text-purple-400 font-bold block mb-6">Ultimate 2D Fighting & Story Game (Balanced)</span>
+                <p class="text-gray-300 text-sm sm:text-base mb-8">Vivencie missões em cadeia com cutscenes cinematográficas estilo Demon Slayer, o devastador Vazio Roxo de Gojo com efeitos de impacto e combate 2D perfeitamente balanceado.</p>
+                
+                <div class="space-y-4 max-w-md mx-auto">
+                    <button onclick="openStoryMap()" class="w-full py-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold rounded-2xl shadow-xl transition transform hover:scale-105 text-sm tracking-wider uppercase flex items-center justify-center space-x-3">
+                        <i class="fa-solid fa-scroll text-lg"></i><span>Modo História (Missões & Cutscenes)</span>
+                    </button>
+                    <button onclick="goToCharSelect('versus')" class="w-full py-4 bg-gradient-to-r from-red-600 to-purple-600 hover:from-red-500 hover:to-purple-500 text-white font-bold rounded-2xl shadow-xl transition transform hover:scale-105 text-sm tracking-wider uppercase flex items-center justify-center space-x-3">
+                        <i class="fa-solid fa-user-group text-lg"></i><span>Modo Versus (P1 vs CPU)</span>
+                    </button>
+                    <button onclick="goToCharSelect('training')" class="w-full py-4 bg-jjtCard hover:bg-white/10 text-purple-300 border border-purple-500/40 font-bold rounded-2xl transition text-sm tracking-wider uppercase flex items-center justify-center space-x-3">
+                        <i class="fa-solid fa-dumbbell text-lg"></i><span>Academia Jujutsu (Modo Treino)</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TELA 1.1: MAPA DE MISSÕES DO MODO HISTÓRIA -->
+        <div id="screen-story" class="w-full max-w-4xl space-y-6 hidden">
+            <div class="text-center">
+                <span class="text-purple-400 font-bold uppercase tracking-wider text-xs">Campanha Oficial do Anime</span>
+                <h2 class="text-3xl sm:text-4xl font-black title-font mt-2 mb-2">Mapa de Missões em Cadeia</h2>
+                <p class="text-gray-400 text-sm">Conclua as missões em ordem para desbloquear arcos e acionar cutscenes especiais de batalha.</p>
+            </div>
+            <div id="story-missions-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Gerado via JS -->
+            </div>
+            <div class="text-center pt-4">
+                <button onclick="returnToMenu()" class="px-6 py-3 bg-jjtCard border border-purple-500/30 rounded-xl text-xs font-semibold text-gray-300 hover:text-white transition">Voltar ao Menu</button>
+            </div>
+        </div>
+
+        <!-- TELA 2: SELEÇÃO DE PERSONAGENS -->
+        <div id="screen-char-select" class="w-full max-w-5xl space-y-6 hidden">
+            <div class="text-center">
+                <span class="text-purple-400 font-bold uppercase tracking-wider text-xs">Elenco com Sprites Fiéis e Marcas de Sukuna</span>
+                <h2 class="text-3xl sm:text-4xl font-black title-font mt-2 mb-2">Selecione Seu Combatente</h2>
+                <p id="select-instruction" class="text-gray-400 text-sm">Escolha seu personagem para entrar na arena.</p>
+            </div>
+
+            <!-- Grid de Personagens -->
+            <div id="roster-select-grid" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+                <!-- Gerado via JS -->
+            </div>
+
+            <!-- Preview do Combatente -->
+            <div class="bg-jjtCard border border-purple-500/30 rounded-3xl p-6 flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="space-y-2 text-center md:text-left">
+                    <span id="preview-rank" class="px-3 py-1 bg-purple-600/20 text-purple-300 border border-purple-500/30 rounded-full text-xs font-bold uppercase">Grau Especial</span>
+                    <h3 id="preview-name" class="text-3xl font-black title-font text-white">Satoru Gojo</h3>
+                    <p id="preview-desc" class="text-gray-300 text-sm max-w-lg">O feiticeiro mais forte da atualidade. Infinito ativo e Vazio Roxo devastador.</p>
+                </div>
+                <button onclick="startBattleWithSelected()" class="px-8 py-4 bg-gradient-to-r from-purple-600 to-red-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold rounded-2xl shadow-xl transition text-base tracking-wider uppercase">
+                    Iniciar Luta <i class="fa-solid fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- TELA 3: ARENA DE LUTA 2D COM HITBOX PRECISA E ANIMAÇÕES DEMON SLAYER -->
+        <div id="screen-arena" class="w-full max-w-6xl space-y-4 hidden">
+            <!-- HUD Superior -->
+            <div class="grid grid-cols-2 gap-4 items-center bg-jjtCard/85 backdrop-blur-md border border-purple-500/30 p-4 rounded-3xl">
+                <!-- P1 HUD -->
+                <div class="space-y-1">
+                    <div class="flex justify-between items-center text-xs">
+                        <span id="hud-p1-name" class="font-bold text-white text-sm">Yuji Itadori</span>
+                        <span id="hud-p1-hp" class="text-emerald-400 font-bold">200/200</span>
+                    </div>
+                    <div class="w-full bg-gray-800 h-3.5 rounded-full overflow-hidden border border-gray-700">
+                        <div id="hud-p1-hp-bar" class="bg-emerald-500 h-full transition-all duration-75" style="width: 100%;"></div>
+                    </div>
+                    <div class="flex justify-between items-center text-[10px] text-gray-400 pt-1">
+                        <span>Energia (CE): <strong id="hud-p1-ce" class="text-purple-400">0</strong>/100</span>
+                        <span>Domínio / Vazio Roxo: <strong id="hud-p1-dom" class="text-amber-400">0%</strong></span>
+                    </div>
+                </div>
+
+                <!-- P2 / CPU HUD -->
+                <div class="space-y-1 text-right">
+                    <div class="flex justify-between items-center text-xs">
+                        <span id="hud-p2-hp" class="text-red-400 font-bold">200/200</span>
+                        <span id="hud-p2-name" class="font-bold text-red-300 text-sm">Ryomen Sukuna</span>
+                    </div>
+                    <div class="w-full bg-gray-800 h-3.5 rounded-full overflow-hidden border border-gray-700">
+                        <div id="hud-p2-hp-bar" class="bg-red-600 h-full transition-all duration-75 ml-auto" style="width: 100%;"></div>
+                    </div>
+                    <div class="flex justify-between items-center text-[10px] text-gray-400 pt-1">
+                        <span>Domínio / Supremo: <strong id="hud-p2-dom" class="text-amber-400">0%</strong></span>
+                        <span>Energia (CE): <strong id="hud-p2-ce" class="text-purple-400">0</strong>/100</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Canvas de Luta 2D -->
+            <div class="relative w-full aspect-[16/9] max-h-[580px] bg-black rounded-3xl overflow-hidden border-2 border-purple-500/50 cursed-glow flex items-center justify-center">
+                <canvas id="fightCanvas" width="960" height="540" class="w-full h-full object-cover"></canvas>
+            </div>
+
+            <!-- Controles Táticos -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-jjtCard border border-purple-500/20 rounded-3xl p-4">
+                <div class="text-xs text-gray-300 space-y-1">
+                    <p><strong class="text-white">Controles:</strong> <span class="text-purple-400">A / D / Setas</span> (Mover), <span class="text-purple-400">W / Espaço</span> (Pular), <span class="text-purple-400">S</span> (Defender)</p>
+                    <p><strong class="text-white">Ações:</strong> <span class="text-amber-400">J</span> (Soco), <span class="text-amber-400">K</span> (Chute), <span class="text-indigo-400">I</span> (Especial Black Flash), <span class="text-red-400">L</span> (Vazio Roxo / Domínio)</p>
+                </div>
+                <div class="flex justify-end items-center gap-2 flex-wrap">
+                    <button onclick="p1Action('punch')" class="px-3 py-2 bg-purple-600 hover:bg-purple-500 rounded-xl text-xs font-bold text-white shadow">Soco (J)</button>
+                    <button onclick="p1Action('kick')" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-bold text-white shadow">Chute (K)</button>
+                    <button onclick="p1Action('special')" class="px-3 py-2 bg-blue-600 hover:bg-blue-500 rounded-xl text-xs font-bold text-white shadow">Especial (I)</button>
+                    <button onclick="p1Action('domain')" class="px-3 py-2 bg-gradient-to-r from-amber-600 to-red-600 rounded-xl text-xs font-bold text-white shadow">Vazio Roxo / Domínio (L)</button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Rodapé -->
+    <footer class="bg-jjtCard border-t border-purple-900/30 py-6 text-center text-xs text-gray-500">
+        <p>Jujutsu Kaisen: Cursed Clash Ultimate 2D &bull; Balanceamento otimizado com Efeitos Estilo Demon Slayer.</p>
+    </footer>
+
+    <!-- Script Principal -->
+    <script>
+        // --- ELENCO BALANCEADO DE 8 PERSONAGENS COM VISUAL FIEL AO ANIME E MARCAS DE SUKUNA ---
+        const fightersData = [
+            {
+                id: 'yuji', name: 'Yuji Itadori', rank: 'Grau 1', type: 'student',
+                desc: 'Cabelo rosa/preto, capuz escuro, força sobre-humana e Black Flash (Flash Negro).',
+                color: '#ec4899', hairColor: '#f43f5e', outfitColor: '#1e293b', hp: 200, attack: 25,
+                domainName: 'PUNHO DIVERGENTE & BLACK FLASH'
+            },
+            {
+                id: 'gojo', name: 'Satoru Gojo', rank: 'Grau Especial', type: 'teacher',
+                desc: 'Cabelo branco espetado, venda preta nos olhos, terno escuro e Vazio Roxo (Hollow Purple).',
+                color: '#38bdf8', hairColor: '#ffffff', outfitColor: '#0f172a', hp: 220, attack: 32,
+                domainName: 'TÉCNICA SUPREMA: VA ZIO ROXO (HOLLOW PURPLE)'
+            },
+            {
+                id: 'sukuna', name: 'Ryomen Sukuna', rank: 'Grau Especial', type: 'curse',
+                desc: 'Rei das Maldições com marcações corporais e faciais pretas características, 4 olhos e Santuário.',
+                color: '#ef4444', hairColor: '#fecdd3', outfitColor: '#f8fafc', hp: 230, attack: 34,
+                domainName: 'EXPANSÃO DE DOMÍNIO: SANTUÁRIO MALEVOLENTE'
+            },
+            {
+                id: 'megumi', name: 'Megumi Fushiguro', rank: 'Grau 2', type: 'student',
+                desc: 'Cabelo preto ouriçado, uniforme escuro da Jujutsu High e Shikigamis das Dez Sombras.',
+                color: '#6366f1', hairColor: '#1e1b4b', outfitColor: '#0f172a', hp: 190, attack: 24,
+                domainName: 'JARDIM DAS SOMBRAS QUIMERA'
+            },
+            {
+                id: 'nobara', name: 'Nobara Kugisaki', rank: 'Grau 3', type: 'student',
+                desc: 'Cabelo castanho, saia/jaqueta e técnica de Vodu com martelo e pregos de ressonância.',
+                color: '#f59e0b', hairColor: '#b45309', outfitColor: '#3b82f6', hp: 180, attack: 26,
+                domainName: 'RESSONÂNCIA AMALDIÇOADA TOTAL'
+            },
+            {
+                id: 'nanami', name: 'Kento Nanami', rank: 'Grau 1', type: 'teacher',
+                desc: 'Óculos escuros, terno bege com gravata de bolinhas e Técnica da Razão 7:3.',
+                color: '#eab308', hairColor: '#713f12', outfitColor: '#ca8a04', hp: 210, attack: 28,
+                domainName: 'PONTO FRACO CRÍTICO 7:3'
+            },
+            {
+                id: 'toji', name: 'Toji Fushiguro', rank: 'Grau Especial', type: 'human',
+                desc: 'Restrição Celestial absoluta, cicatriz na boca, camisa preta e Lança Invertida do Céu.',
+                color: '#10b981', hairColor: '#111827', outfitColor: '#1f2937', hp: 220, attack: 31,
+                domainName: 'ASSASSINO DE FEITICEIROS'
+            },
+            {
+                id: 'mahito', name: 'Mahito', rank: 'Grau Especial', type: 'curse',
+                desc: 'Cabelo azul claro repartido, corpo patchwork amaldiçoado e transfiguração da alma.',
+                color: '#06b6d4', hairColor: '#0891b2', outfitColor: '#cbd5e1', hp: 200, attack: 27,
+                domainName: 'EMBALO DA AUTODESTRUIÇÃO (PERFEIÇÃO)'
+            }
+        ];
+
+        // --- MODO HISTÓRIA COM CUTSCENES CINEMATOGRÁFICAS ---
+        const storyMissions = [
+            {
+                id: 'sm1', title: 'Cap. 1: O Receptáculo de Sukuna',
+                desc: 'Investigue o colégio abandonado e derrote o espírito amaldiçoado.',
+                req: null, enemy: 'megumi', exp: 60,
+                cutscene: {
+                    title: 'CENA ESPECIAL: O Despertar de Sukuna',
+                    text: 'Yuji engole o dedo amaldiçoado. As marcas negras de Sukuna aparecem pelo seu corpo, despertando o Rei das Maldições!'
+                }
+            },
+            {
+                id: 'sm2', title: 'Cap. 2: O Centro Penitenciário',
+                desc: 'Enfrente o portador do dedo de Sukuna e teste seu poder.',
+                req: 'sm1', enemy: 'sukuna', exp: 120,
+                cutscene: {
+                    title: 'CENA ESPECIAL: Santuário Malevolente',
+                    text: 'A maldição de grau especial é obliterada pelas lâminas invisíveis de Cleave e Dismantle em um massacre implacável.'
+                }
+            },
+            {
+                id: 'sm3', title: 'Cap. 3: O Confronto com Mahito',
+                desc: 'Exorcize a maldição mutante nas ruas de Tóquio.',
+                req: 'sm2', enemy: 'mahito', exp: 200,
+                cutscene: {
+                    title: 'CENA ESPECIAL: O Despertar do Flash Negro',
+                    text: 'Em meio ao desespero contra Mahito, Yuji atinge o ápice da concentração e libera faíscas negras com distorção espacial!'
+                }
+            },
+            {
+                id: 'sm4', title: 'Cap. 4: Incidente de Shibuya (Gojo vs Sukuna)',
+                desc: 'O combate supremo entre o mais forte da atualidade e o rei.',
+                req: 'sm3', enemy: 'sukuna', exp: 400,
+                cutscene: {
+                    title: 'CENA ESPECIAL: O Vazio Roxo Definitivo',
+                    text: 'Gojo Satoru junta as polaridades do infinito e destrói o campo de batalha com uma esfera devastadora de energia pura!'
+                }
+            }
+        ];
+
+        let gameState = {
+            mode: 'arcade',
+            completedMissions: [],
+            selectedP1: 'yuji',
+            selectedP2: 'sukuna',
+            storyMissionId: null,
+            pendingCutscene: null
+        };
+
+        function loadGame() {
+            const saved = localStorage.getItem('jjt_ultimate_clash_save_v3');
+            if (saved) {
+                try { gameState = JSON.parse(saved); } catch(e) {}
+            }
+        }
+        function saveGame() {
+            localStorage.setItem('jjt_ultimate_clash_save_v3', JSON.stringify(gameState));
+        }
+
+        // --- NAVEGAÇÃO ---
+        function returnToMenu() {
+            document.getElementById('screen-menu').classList.remove('hidden');
+            document.getElementById('screen-story').classList.add('hidden');
+            document.getElementById('screen-char-select').classList.add('hidden');
+            document.getElementById('screen-arena').classList.add('hidden');
+            fightActive = false;
+        }
+
+        function openStoryMap() {
+            gameState.mode = 'story';
+            document.getElementById('screen-menu').classList.add('hidden');
+            document.getElementById('screen-story').classList.remove('hidden');
+            renderStoryMissions();
+        }
+
+        function renderStoryMissions() {
+            const container = document.getElementById('story-missions-grid');
+            container.innerHTML = "";
+
+            storyMissions.forEach((m, idx) => {
+                const isCompleted = gameState.completedMissions.includes(m.id);
+                const isUnlocked = !m.req || gameState.completedMissions.includes(m.req);
+
+                const card = document.createElement('div');
+                card.className = `bg-jjtCard border ${isCompleted ? 'border-emerald-500/40' : isUnlocked ? 'border-purple-500/30' : 'border-gray-800 opacity-60'} rounded-3xl p-6 flex flex-col justify-between`;
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="px-3 py-1 ${isCompleted ? 'bg-emerald-600/20 text-emerald-300' : 'bg-purple-600/20 text-purple-300'} rounded-full text-xs font-bold uppercase">Missão ${idx+1}</span>
+                            ${isCompleted ? '<span class="text-emerald-400 text-xs font-bold"><i class="fa-solid fa-check-circle"></i> Concluída</span>' : !isUnlocked ? '<span class="text-red-400 text-xs"><i class="fa-solid fa-lock"></i> Requer anterior</span>' : ''}
+                        </div>
+                        <h3 class="text-xl font-black title-font text-white mb-2">${m.title}</h3>
+                        <p class="text-gray-300 text-sm mb-4 leading-relaxed">${m.desc}</p>
+                        <span class="text-xs text-purple-400 font-semibold"><i class="fa-solid fa-bolt"></i> Recompensa: +${m.exp} EXP</span>
+                    </div>
+                    <button onclick="triggerStoryCutscene('${m.id}', '${m.enemy}')" ${!isUnlocked ? 'disabled' : ''} class="w-full mt-4 py-3 ${!isUnlocked ? 'bg-gray-800 text-gray-500 cursor-not-allowed' : 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg'} font-bold rounded-xl text-xs transition">
+                        ${!isUnlocked ? 'Bloqueada' : isCompleted ? 'Jogar Missão' : 'Iniciar Missão'}
+                    </button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function triggerStoryCutscene(mId, enemyId) {
+            const m = storyMissions.find(x => x.id === mId);
+            if (!m) return;
+            gameState.storyMissionId = mId;
+            gameState.selectedP1 = 'yuji';
+            gameState.selectedP2 = enemyId;
+
+            showModal(m.cutscene.title, m.cutscene.text, "fa-solid fa-film");
+        }
+
+        function closeModalToMenu() {
+            document.getElementById('modal-container').classList.add('hidden');
+            if (gameState.mode === 'story' && gameState.storyMissionId) {
+                document.getElementById('screen-story').classList.add('hidden');
+                document.getElementById('screen-arena').classList.remove('hidden');
+                initFightEngine();
+            } else if (gameState.mode === 'story') {
+                openStoryMap();
+            } else {
+                returnToMenu();
+            }
+        }
+
+        function goToCharSelect(mode) {
+            gameState.mode = mode;
+            document.getElementById('screen-menu').classList.add('hidden');
+            document.getElementById('screen-char-select').classList.remove('hidden');
+            renderRosterSelect();
+            selectRosterFighter('gojo');
+        }
+
+        function renderRosterSelect() {
+            const grid = document.getElementById('roster-select-grid');
+            grid.innerHTML = "";
+
+            fightersData.forEach(f => {
+                const isSelected = gameState.selectedP1 === f.id;
+                const card = document.createElement('div');
+                card.className = `bg-jjtCard border ${isSelected ? 'border-amber-400 scale-105' : 'border-purple-500/30'} rounded-2xl p-3 text-center cursor-pointer transition hover:border-purple-400 flex flex-col items-center justify-between`;
+                card.onclick = () => selectRosterFighter(f.id);
+                card.innerHTML = `
+                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-white text-xl shadow-lg mb-2" style="background: linear-gradient(135deg, ${f.color}, #030308)">
+                        <i class="fa-solid fa-user-ninja"></i>
+                    </div>
+                    <h4 class="font-bold text-xs text-white title-font">${f.name}</h4>
+                    <span class="text-[9px] text-purple-400 uppercase mt-1">${f.rank}</span>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function selectRosterFighter(id) {
+            gameState.selectedP1 = id;
+            const f = fightersData.find(x => x.id === id);
+            if (f) {
+                document.getElementById('preview-rank').innerText = f.rank;
+                document.getElementById('preview-name').innerText = f.name;
+                document.getElementById('preview-desc').innerText = f.desc;
+            }
+            renderRosterSelect();
+        }
+
+        function startBattleWithSelected() {
+            document.getElementById('screen-char-select').classList.add('hidden');
+            document.getElementById('screen-arena').classList.remove('hidden');
+
+            if (gameState.mode === 'versus') {
+                const available = fightersData.filter(x => x.id !== gameState.selectedP1);
+                gameState.selectedP2 = available[Math.floor(Math.random() * available.length)].id;
+            } else if (gameState.mode === 'training') {
+                gameState.selectedP2 = 'sukuna';
+            }
+            initFightEngine();
+        }
+
+        // --- WEB AUDIO API ---
+        let audioCtx = null;
+        let isAudioOn = true;
+        function playSound(type) {
+            if (!isAudioOn) return;
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                const now = audioCtx.currentTime;
+
+                if (type === 'punch') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(240, now);
+                    osc.frequency.linearRampToValueAtTime(35, now + 0.12);
+                    gain.gain.setValueAtTime(0.45, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.12);
+                    osc.start(now); osc.stop(now + 0.12);
+                } else if (type === 'special') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(380, now);
+                    osc.frequency.exponentialRampToValueAtTime(980, now + 0.35);
+                    gain.gain.setValueAtTime(0.5, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.35);
+                    osc.start(now); osc.stop(now + 0.35);
+                } else if (type === 'domain') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(110, now);
+                    osc.frequency.linearRampToValueAtTime(850, now + 0.7);
+                    gain.gain.setValueAtTime(0.6, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.7);
+                    osc.start(now); osc.stop(now + 0.7);
+                }
+            } catch(e) {}
+        }
+        function toggleAudio() {
+            isAudioOn = !isAudioOn;
+            document.getElementById('audio-btn').innerHTML = isAudioOn ? '<i class="fa-solid fa-volume-high"></i><span>Áudio</span>' : '<i class="fa-solid fa-volume-xmark"></i><span>Mudo</span>';
+        }
+
+        // --- ENGINE DE LUTA 2D COM HITBOX PRECISA E CUTSCENES ESTILO DEMON SLAYER ---
+        let canvas, ctx;
+        let fightActive = false;
+        let keys = {};
+        let player1 = null, player2 = null;
+        let domainCinematic = null;
+        let hollowPurpleEffect = null; // Efeito especial do Vazio Roxo
+        let particles = [];
+
+        function initFightEngine() {
+            canvas = document.getElementById('fightCanvas');
+            ctx = canvas.getContext('2d');
+            resizeFightCanvas();
+
+            const p1Data = fightersData.find(x => x.id === gameState.selectedP1);
+            const p2Data = fightersData.find(x => x.id === gameState.selectedP2);
+
+            player1 = {
+                id: p1Data.id, name: p1Data.name, domainTitle: p1Data.domainName,
+                x: 160, y: 340, width: 66, height: 90,
+                vx: 0, vy: 0, speed: 6.2, jumpForce: -14.5, isJumping: false,
+                hp: p1Data.hp, maxHp: p1Data.hp, attack: p1Data.attack,
+                ce: 0, domainGauge: 0, facing: 1,
+                attacking: false, attackType: null, attackTimer: 0,
+                blocking: false, hitStun: 0,
+                color: p1Data.color, hairColor: p1Data.hairColor, outfitColor: p1Data.outfitColor
+            };
+
+            player2 = {
+                id: p2Data.id, name: p2Data.name, domainTitle: p2Data.domainName,
+                x: 740, y: 340, width: 66, height: 90,
+                vx: 0, vy: 0, speed: 5.8, jumpForce: -14.5, isJumping: false,
+                hp: p2Data.hp, maxHp: p2Data.hp, attack: p2Data.attack,
+                ce: 0, domainGauge: 0, facing: -1,
+                attacking: false, attackType: null, attackTimer: 0,
+                blocking: false, hitStun: 0,
+                color: p2Data.color, hairColor: p2Data.hairColor, outfitColor: p2Data.outfitColor
+            };
+
+            document.getElementById('hud-p1-name').innerText = player1.name;
+            document.getElementById('hud-p2-name').innerText = player2.name;
+
+            fightActive = true;
+            particles = [];
+            domainCinematic = null;
+            hollowPurpleEffect = null;
+            requestAnimationFrame(fightLoop);
+        }
+
+        function resizeFightCanvas() {
+            if (canvas) {
+                canvas.width = canvas.parentElement.clientWidth || 960;
+                canvas.height = 540;
+            }
+        }
+        window.addEventListener('resize', resizeFightCanvas);
+
+        window.addEventListener('keydown', e => {
+            if (!fightActive) return;
+            const k = e.key.toLowerCase();
+            keys[k] = true;
+            if (k === 'j') p1Action('punch');
+            if (k === 'k') p1Action('kick');
+            if (k === 'i') p1Action('special');
+            if (k === 'l') p1Action('domain');
+        });
+        window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+
+        function p1Action(action) {
+            if (!fightActive || player1.hitStun > 0 || player1.attacking || domainCinematic || hollowPurpleEffect) return;
+
+            if (action === 'punch') {
+                player1.attacking = true;
+                player1.attackType = 'punch';
+                player1.attackTimer = 12;
+                playSound('punch');
+                checkPreciseHitbox(player1, player2, player1.attack, 75);
+            } else if (action === 'kick') {
+                player1.attacking = true;
+                player1.attackType = 'kick';
+                player1.attackTimer = 15;
+                playSound('punch');
+                checkPreciseHitbox(player1, player2, player1.attack + 8, 90);
+            } else if (action === 'special') {
+                if (player1.ce < 35) return;
+                player1.ce -= 35;
+                player1.attacking = true;
+                player1.attackType = 'special';
+                player1.attackTimer = 22;
+                playSound('special');
+                checkPreciseHitbox(player1, player2, player1.attack * 2.1, 130);
+            } else if (action === 'domain') {
+                if (player1.domainGauge < 100) return;
+                player1.domainGauge = 0;
+                
+                if (player1.id === 'gojo') {
+                    triggerHollowPurpleCutscene(player1, player2);
+                } else {
+                    triggerDomainExpansion(player1, player2);
+                }
+            }
+        }
+
+        // Sistema de Hitbox/Hurtbox Preciso e Invisível
+        function checkPreciseHitbox(attacker, defender, damage, range) {
+            const hurtbox = {
+                x: defender.x + 10,
+                y: defender.y + 10,
+                width: defender.width - 20,
+                height: defender.height - 10
+            };
+
+            const hitboxX = attacker.facing > 0 ? (attacker.x + attacker.width) : (attacker.x - range);
+            const hitbox = {
+                x: hitboxX,
+                y: attacker.y + 15,
+                width: range,
+                height: attacker.height - 30
+            };
+
+            const isHit = (
+                hitbox.x < hurtbox.x + hurtbox.width &&
+                hitbox.x + hitbox.width > hurtbox.x &&
+                hitbox.y < hurtbox.y + hurtbox.height &&
+                hitbox.y + hitbox.height > hurtbox.y
+            );
+
+            if (isHit) {
+                if (defender.blocking) {
+                    damage = Math.floor(damage * 0.15);
+                } else {
+                    defender.hitStun = 18;
+                    defender.vx = attacker.facing * 7;
+                }
+                defender.hp = Math.max(0, defender.hp - damage);
+                attacker.ce = Math.min(100, attacker.ce + 22);
+                attacker.domainGauge = Math.min(100, attacker.domainGauge + 30);
+
+                for(let i=0; i<16; i++) {
+                    particles.push({
+                        x: defender.x + defender.width/2, y: defender.y + defender.height/2,
+                        vx: (Math.random()-0.5)*16, vy: (Math.random()-0.5)*16,
+                        color: attacker.id === 'gojo' ? '#a855f7' : attacker.id === 'sukuna' ? '#ef4444' : '#ec4899', life: 26
+                    });
+                }
+            }
+        }
+
+        function triggerDomainExpansion(caster, target) {
+            playSound('domain');
+            domainCinematic = {
+                title: caster.domainTitle,
+                timer: 150,
+                casterName: caster.name,
+                sub: `O oponente foi capturado no espaço amaldiçoado absoluto de ${caster.name}!`
+            };
+            target.hp = Math.max(0, target.hp - 110);
+            caster.domainGauge = 0;
+        }
+
+        // Cutscene Estilo Demon Slayer para o Vazio Roxo de Gojo
+        function triggerHollowPurpleCutscene(caster, target) {
+            playSound('special');
+            hollowPurpleEffect = {
+                timer: 140,
+                phase: 1, // 1: Carga, 2: Impacto explosivo
+                sub: "TÉCNICA IMAGINÁRIA: VAZIO ROXO"
+            };
+            target.hp = Math.max(0, target.hp - 140);
+            caster.domainGauge = 0;
+
+            for(let i=0; i<40; i++) {
+                particles.push({
+                    x: canvas.width/2, y: canvas.height/2,
+                    vx: (Math.random()-0.5)*25, vy: (Math.random()-0.5)*25,
+                    color: '#c084fc', life: 40
+                });
+            }
+        }
+
+        function fightLoop() {
+            if (!fightActive) return;
+            updateFight();
+            renderFight();
+            requestAnimationFrame(fightLoop);
+        }
+
+        function updateFight() {
+            if (domainCinematic) {
+                domainCinematic.timer--;
+                if (domainCinematic.timer <= 0) domainCinematic = null;
+                return;
+            }
+
+            if (hollowPurpleEffect) {
+                hollowPurpleEffect.timer--;
+                if (hollowPurpleEffect.timer <= 0) hollowPurpleEffect = null;
+                return;
+            }
+
+            if (player1.hitStun === 0) {
+                if (keys['a'] || keys['arrowleft']) {
+                    player1.vx = -player1.speed;
+                    player1.facing = -1;
+                } else if (keys['d'] || keys['arrowright']) {
+                    player1.vx = player1.speed;
+                    player1.facing = 1;
+                } else {
+                    player1.vx = 0;
+                }
+
+                if ((keys['w'] || keys['arrowup'] || keys[' ']) && !player1.isJumping) {
+                    player1.vy = player1.jumpForce;
+                    player1.isJumping = true;
+                }
+                player1.blocking = keys['s'] || keys['arrowdown'];
+            } else {
+                player1.hitStun--;
+                player1.vx = 0;
+            }
+
+            player1.vy += 0.65;
+            player1.x += player1.vx;
+            player1.y += player1.vy;
+            if (player1.y > 340) { player1.y = 340; player1.vy = 0; player1.isJumping = false; }
+            if (player1.attacking) {
+                player1.attackTimer--;
+                if (player1.attackTimer <= 0) player1.attacking = false;
+            }
+
+            if (player2.hitStun === 0) {
+                const dx = (player1.x + player1.width/2) - (player2.x + player2.width/2);
+                player2.facing = dx > 0 ? 1 : -1;
+
+                if (Math.abs(dx) > 75) {
+                    player2.vx = Math.sign(dx) * player2.speed * 0.95;
+                } else {
+                    player2.vx = 0;
+                    if (Math.random() < 0.04 && !player2.attacking) {
+                        player2.attacking = true;
+                        player2.attackType = Math.random() > 0.4 ? 'punch' : 'special';
+                        player2.attackTimer = 15;
+                        playSound('punch');
+                        checkPreciseHitbox(player2, player1, player2.attack, 80);
+                    }
+                    if (player2.domainGauge >= 100 && Math.random() < 0.12) {
+                        triggerDomainExpansion(player2, player1);
+                    }
+                }
+            } else {
+                player2.hitStun--;
+                player2.vx = 0;
+            }
+
+            player2.vy += 0.65;
+            player2.x += player2.vx;
+            player2.y += player2.vy;
+            if (player2.y > 340) { player2.y = 340; player2.vy = 0; player2.isJumping = false; }
+            if (player2.attacking) {
+                player2.attackTimer--;
+                if (player2.attackTimer <= 0) player2.attacking = false;
+            }
+
+            if (player1.x < 15) player1.x = 15;
+            if (player1.x > canvas.width - 80) player1.x = canvas.width - 80;
+            if (player2.x < 15) player2.x = 15;
+            if (player2.x > canvas.width - 80) player2.x = canvas.width - 80;
+
+            for(let i = particles.length - 1; i >= 0; i--) {
+                let pt = particles[i];
+                pt.x += pt.vx; pt.y += pt.vy; pt.life--;
+                if(pt.life <= 0) particles.splice(i, 1);
+            }
+
+            document.getElementById('hud-p1-hp').innerText = `${Math.max(0, player1.hp)}/${player1.maxHp}`;
+            document.getElementById('hud-p1-hp-bar'].style.width = `${(player1.hp / player1.maxHp) * 100}%`;
+            document.getElementById('hud-p1-ce').innerText = player1.ce;
+            document.getElementById('hud-p1-dom').innerText = `${Math.floor(player1.domainGauge)}%`;
+
+            document.getElementById('hud-p2-hp').innerText = `${Math.max(0, player2.hp)}/${player2.maxHp}`;
+            document.getElementById('hud-p2-hp-bar'].style.width = `${(player2.hp / player2.maxHp) * 100}%`;
+            document.getElementById('hud-p2-ce').innerText = player2.ce;
+            document.getElementById('hud-p2-dom').innerText = `${Math.floor(player2.domainGauge)}%`;
+
+            if (player1.hp <= 0 || player2.hp <= 0) {
+                fightActive = false;
+                const p1Won = player1.hp > 0;
+                if (p1Won && gameState.mode === 'story' && gameState.storyMissionId) {
+                    if (!gameState.completedMissions.includes(gameState.storyMissionId)) {
+                        gameState.completedMissions.push(gameState.storyMissionId);
+                        saveGame();
+                    }
+                }
+                showModal("Fim da Batalha", p1Won ? "Vitória gloriosa! Inimigo exorcizado." : "Derrota! Treine mais na Academia Jujutsu.", "fa-solid fa-trophy");
+            }
+        }
+
+        function renderFight() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Cutscene / Efeito Especial estilo Demon Slayer para Vazio Roxo
+            if (hollowPurpleEffect) {
+                ctx.fillStyle = 'rgba(15, 3, 30, 0.96)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Círculos concêntricos de energia roxa e azul (Estilo Demon Slayer)
+                const cx = canvas.width / 2;
+                const cy = canvas.height / 2;
+                
+                const grad = ctx.createRadialGradient(cx, cy, 10, cx, cy, 320);
+                grad.addColorStop(0, '#ffffff');
+                grad.addColorStop(0.3, '#c084fc');
+                grad.addColorStop(0.7, '#3b82f6');
+                grad.addColorStop(1, 'transparent');
+                
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.arc(cx, cy, 350, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 36px Cinzel, serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(hollowPurpleEffect.sub, cx, cy - 60);
+
+                ctx.fillStyle = '#e9d5ff';
+                ctx.font = '16px Inter, sans-serif';
+                ctx.fillText("Massas imaginárias colidem, apagando tudo ao redor.", cx, cy - 10);
+                return;
+            }
+
+            if (domainCinematic) {
+                ctx.fillStyle = 'rgba(3, 3, 12, 0.98)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.strokeStyle = '#38bdf8';
+                ctx.lineWidth = 6;
+                ctx.strokeRect(35, 35, canvas.width - 70, canvas.height - 70);
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 34px Cinzel, serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(domainCinematic.title, canvas.width/2, canvas.height/2 - 45);
+
+                ctx.fillStyle = '#38bdf8';
+                ctx.font = 'bold 16px Inter, sans-serif';
+                ctx.fillText(`Lançador: ${domainCinematic.casterName}`, canvas.width/2, canvas.height/2 + 10);
+                ctx.fillStyle = '#cbd5e1';
+                ctx.font = '14px Inter, sans-serif';
+                ctx.fillText(domainCinematic.sub, canvas.width/2, canvas.height/2 + 50);
+                return;
+            }
+
+            ctx.fillStyle = '#0e0e22';
+            ctx.fillRect(0, 430, canvas.width, 110);
+            ctx.fillStyle = '#7c3aed';
+            ctx.fillRect(0, 430, canvas.width, 5);
+
+            drawAnimeFighterSprite(player1);
+            drawAnimeFighterSprite(player2);
+
+            particles.forEach(pt => {
+                ctx.fillStyle = pt.color;
+                ctx.fillRect(pt.x, pt.y, 6, 6);
+            });
+        }
+
+        function drawAnimeFighterSprite(f) {
+            ctx.save();
+            ctx.translate(f.x, f.y);
+
+            ctx.fillStyle = f.outfitColor;
+            ctx.fillRect(10, 32, f.width - 20, f.height - 32);
+
+            if (f.id === 'gojo') {
+                // Gojo Satoru com cabelo branco espetado e venda preta
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath(); ctx.moveTo(4, 26); ctx.lineTo(f.width/2, 0); ctx.lineTo(f.width - 4, 26); ctx.closePath(); ctx.fill();
+                ctx.fillStyle = '#fbcfe8'; ctx.fillRect(12, 18, f.width - 24, 20);
+                ctx.fillStyle = '#0f172a'; ctx.fillRect(12, 22, f.width - 24, 7);
+            } else if (f.id === 'sukuna') {
+                // Ryomen Sukuna: Cabelo rosa/branco, quimono e MARCAS CORPORAIS E FACIAIS PRETAS FIÉIS AO ANIME
+                ctx.fillStyle = '#f8fafc'; ctx.fillRect(8, 28, f.width - 16, f.height - 28);
+                
+                // Marcas pretas no corpo (Tatuagens do Sukuna)
+                ctx.fillStyle = '#000000';
+                ctx.fillRect(18, 45, 6, 24);
+                ctx.fillRect(f.width - 24, 45, 6, 24);
+                ctx.fillRect(20, 75, f.width - 40, 4);
+
+                ctx.fillStyle = '#fecdd3';
+                ctx.beginPath(); ctx.moveTo(2, 24); ctx.lineTo(f.width/2, -2); ctx.lineTo(f.width - 2, 24); ctx.closePath(); ctx.fill();
+                ctx.fillStyle = '#fbcfe8'; ctx.fillRect(12, 16, f.width - 24, 22);
+                
+                // Marcas pretas no rosto e 4 olhos
+                ctx.fillStyle = '#000000'; 
+                ctx.fillRect(15, 20, 8, 3); ctx.fillRect(f.width - 23, 20, 8, 3);
+                ctx.fillRect(18, 24, 4, 10); ctx.fillRect(f.width - 22, 24, 4, 10);
+            } else if (f.id === 'yuji') {
+                ctx.fillStyle = '#f43f5e';
+                ctx.beginPath(); ctx.moveTo(4, 22); ctx.lineTo(f.width/2, 2); ctx.lineTo(f.width - 4, 22); ctx.closePath(); ctx.fill();
+                ctx.fillStyle = '#fbcfe8'; ctx.fillRect(12, 16, f.width - 24, 20);
+            } else if (f.id === 'megumi') {
+                ctx.fillStyle = '#1e1b4b';
+                ctx.beginPath(); ctx.moveTo(2, 25); ctx.lineTo(f.width/2, 0); ctx.lineTo(f.width - 2, 25); ctx.closePath(); ctx.fill();
+                ctx.fillStyle = '#fbcfe8'; ctx.fillRect(12, 16, f.width - 24, 20);
+            } else if (f.id === 'nobara') {
+                ctx.fillStyle = '#b45309'; ctx.fillRect(10, 10, f.width - 20, 16);
+                ctx.fillStyle = '#fbcfe8'; ctx.fillRect(12, 18, f.width - 24, 20);
+            } else if (f.id === 'nanami') {
+                ctx.fillStyle = '#713f12'; ctx.fillRect(10, 10, f.width - 20, 14);
+                ctx.fillStyle = '#fbcfe8'; ctx.fillRect(12, 18, f.width - 24, 20);
+                ctx.fillStyle = '#000000'; ctx.fillRect(16, 22, 10, 4); ctx.fillRect(f.width - 26, 22, 10, 4);
+            } else if (f.id === 'toji') {
+                ctx.fillStyle = '#111827';
+                ctx.beginPath(); ctx.moveTo(4, 24); ctx.lineTo(f.width/2, 4); ctx.lineTo(f.width - 4, 24); ctx.closePath(); ctx.fill();
+                ctx.fillStyle = '#fbcfe8'; ctx.fillRect(12, 16, f.width - 24, 20);
+            } else {
+                ctx.fillStyle = '#0891b2'; ctx.fillRect(10, 10, f.width - 20, 16);
+                ctx.fillStyle = '#cbd5e1'; ctx.fillRect(12, 18, f.width - 24, 20);
+            }
+
+            if (f.attacking) {
+                ctx.fillStyle = f.id === 'gojo' ? '#c084fc' : f.color;
+                ctx.fillRect(f.facing > 0 ? f.width - 4 : -36, 40, 40, 20);
+            }
+
+            ctx.restore();
+        }
+
+        function showModal(title, msg, icon) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-msg').innerText = msg;
+            document.getElementById('modal-icon').innerHTML = `<i class="${icon}"></i>`;
+            document.getElementById('modal-container').classList.remove('hidden');
+        }
+
+        window.onload = function() {
+            loadGame();
+        };
+    </script>
+</body>
+</html>
